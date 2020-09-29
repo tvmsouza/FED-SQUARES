@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+body {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.axis rect {
+  fill: blue;
+  stroke: black;
+  shape-rendering: crispEdges;
+}
+
+table {
+border-collapse: collapse;
+border: 2px black solid;
+font: 12px sans-serif;
+}
+
+td {
+border: 1px black solid;
+padding: 5px;
+}
+
+.axis {
+  opacity: 0.4;
+}
+.axis:hover {
+  opacity: 1;
+}
+
+td {
+  text-align: center;
+}
+
+h2 {
+  text-align: center;
+}
+
+</style>
+
+
+
+<link href="https://unpkg.com/tabulator-tables@4.7.2/dist/css/tabulator.min.css" rel="stylesheet">
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.7.2/dist/js/tabulator.min.js"></script>
+
+<body>
+<h2>FED-Squares-Visualization</h2>
+<table id="initial_table" style="width:100%">
+  <tr>
+    <th>Seleted Image</th>
+    <th>Global Accuracy</th>
+    <th>Dataset details</th>
+  </tr>
+  <tr>
+    <td><img id="sel_image" src="d3.png" width="100" height="100"> </td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+</table>
+
+<!-- Create a div where the graph will take place -->
+<div id="my_dataviz"></div>
+
+<div id="example-table"></div>
+
+<input type="text" placeholder="File Name" id="myInput">
+<button type="button" onclick="getInputValue();">Analyze</button>
+</body>
+  
+
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<script>
+
+function main(fileName){
+// set the dimensions and margins of the graph
+var margin = {top: 80, right: 100, bottom: 20, left: 100},
+    width = window.innerWidth - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+var svg = d3.select("#my_dataviz")
+.append("svg")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+.append("g")
+  .attr("transform",
+        "translate(" + margin.left + "," + margin.top + ")");
+
+// Parse the Data
+d3.csv(fileName+".csv", function(data) {
+
+  // Color scale: give me a specie name, I return a color
+  var color = d3.scaleOrdinal()
+    .domain(["'0','1','2','3','4','5','6','7','8','9'" ])
+    .range(['rgb(165,0,38)','rgb(215,48,39)','rgb(244,109,67)','rgb(253,174,97)','rgb(254,224,139)','rgb(217,239,139)','rgb(166,217,106)','rgb(102,189,99)','rgb(26,152,80)','rgb(0,104,55)'])
+
+  // Here I set the list of dimension manually to control the order of axis:
+  dimensions = ["c0","c1","c2","c3","c4","c5","c6","c7","c8","c9" ]
+  
+  var series = d3.stack()
+    .keys(["c0","c1","c2","c3","c4","c5","c6","c7","c8","c9"])
+    .offset(d3.stackOffsetDiverging)
+    (data);
+
+  tp = [0,0,0,0,0,0,0,0,0,0]
+  tp_score = [[0,0,0,0,0,0,0,0,0,0],
+  	     [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0]]
+  fp =  [0,0,0,0,0,0,0,0,0,0]
+ fp_score = [[0,0,0,0,0,0,0,0,0,0],
+  	     [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0]]
+  fn =  [0,0,0,0,0,0,0,0,0,0]
+fn_score = [[0,0,0,0,0,0,0,0,0,0],
+  	     [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0]]
+
+  sum_samples = [0,0,0,0,0,0,0,0,0,0]
+  total_samples = 0
+  for (i = 0; i < data.length; i++) {
+	console.log(i)
+	sum_samples[parseInt(data[i].ground_thruth)] = sum_samples[parseInt(data[i].ground_thruth)] + 1
+	  for (j = 0; j < tp_score.length; j++) {
+			range_min = 0.0
+		        range_max = 0.1
+		for (k = 0; k < tp_score.length; k++){
+			
+		  	if((data[i].prediction == data[i].ground_thruth) && (data[i].ground_thruth == j)){
+				if ((data[i]['c'+j] >= range_min) && (data[i]['c'+j] < range_max)){
+					tp[j] = tp[j]  + 1
+					tp_score[parseInt(data[i].ground_thruth)][parseInt(k)] = tp_score[parseInt(data[i].ground_thruth)][parseInt(k)] + 1
+				}
+			}
+			if((data[i].prediction != data[i].ground_thruth) && (data[i].ground_thruth == j)){
+				if ((data[i]['c'+j] >= range_min) && (data[i]['c'+j] < range_max)){
+					fp_score[parseInt(data[parseInt(i)].ground_thruth)][parseInt(k)] = fp_score[parseInt(data[parseInt(i)].ground_thruth)][parseInt(k)] + 1
+					fp[parseInt(data[i].ground_thruth)] = fp[parseInt(data[i].ground_thruth)] + 1
+					fn_score[parseInt(data[i].prediction)][parseInt(k)] = fn_score[parseInt(data[i].prediction)][parseInt(k)] + 1
+					fn[parseInt(data[i].prediction)] = fn[parseInt(data[i].prediction)] + 1
+				}
+			}
+			range_min = range_min + 0.1
+			range_max = range_max + 0.1
+		}
+	}
+  }
+
+
+for (i = 0; i < tp.length; i++) {
+for (j = 0; j < tp.length; j++) {
+	if (tp[i] == 0){
+		continue
+	}
+	tp_score[i][j] = tp_score[i][j]/sum_samples[i]
+	
+}
+}
+
+for (i = 0; i < fp.length; i++) {
+for (j = 0; j < fp.length; j++) {
+	if (fp[i] == 0){
+		continue
+	}
+	fp_score[i][j] = fp_score[i][j]/sum_samples[i]
+	
+}
+}
+ 
+for (i = 0; i < fn.length; i++) {
+for (j = 0; j < fn.length; j++) {
+	if (fn[i] == 0){
+		continue
+	}
+	fn_score[i][j] = fn_score[i][j]/sum_samples[i]
+	
+}
+}
+	
+accuracy = 0
+precision = 0
+recall = 0
+tp_all = 0
+fp_all = 0
+fn_all = 0
+
+  for (i = 0; i < sum_samples.length; i++) {
+	total_samples += sum_samples[i]
+	tp_all = tp_all+tp[i]
+	fp_all = fp_all+fp[i]
+	fn_all = fn_all+fn[i]
+  }
+
+accuracy = tp_all/total_samples
+
+var x = document.getElementById("initial_table").rows[1].cells
+x[1].innerHTML = accuracy
+x[2].innerHTML = "Total Samples: "+data.length + "----Class distribution: [" + sum_samples + "]"
+
+
+  for (i = 0; i < sum_samples.length; i++) {
+	tp[i] = tp[i]/sum_samples[i]
+	fp[i] = fp[i]/sum_samples[i]
+	fn[i] = fn[i]/sum_samples[i]
+  }
+
+
+  for (i = 0; i < sum_samples.length; i++) {
+	sum_samples[i] = sum_samples[i]/total_samples
+  } 
+
+
+  // For each dimension, I build a linear scale. I store all in a y object
+  var y = {}
+  var x_ = {}
+  var _x = {}
+  var width_slice = width/10
+  width_slice = width_slice/2
+
+  for (i in dimensions) {
+    name = dimensions[i]
+    y[name] = d3.scaleLinear()
+      .domain( [1.0,0.0] ) // --> Same axis range for each group
+      // --> different axis range for each group --> .domain( [d3.extent(data, function(d) { return +d[name]; })] )
+      .range([0,height])
+  }
+
+  for (i in dimensions){
+       name = dimensions[i]
+       _x[name] = d3.scaleLinear()
+      .domain( [0.0,1.0] ) // --> Same axis range for each group
+      // --> different axis range for each group --> .domain( [d3.extent(data, function(d) { return +d[name]; })] )
+      .range([0,-width_slice])
+  }
+
+
+  for (i in dimensions){
+       name = dimensions[i]
+       x_[name] = d3.scaleLinear()
+      .domain( [0.0,1.0] ) // --> Same axis range for each group
+      // --> different axis range for each group --> .domain( [d3.extent(data, function(d) { return +d[name]; })] )
+      .range([0,width_slice])
+  }
+
+  // Build the X scale -> it find the best position for each Y axis
+  x = d3.scalePoint()
+    .range([0.0, width])
+    .domain(dimensions);
+
+  // Draw the lines
+  /*svg
+    .selectAll("myPath")
+    .data(data)
+    .enter()
+    .append("path")
+      .attr("class", function (d) { return "line " + d.ground_thruth } ) // 2 class for each line: 'line' and the group name
+      .attr("d",  path)
+      .style("fill", "none" )
+      .style("stroke", function(d){ return( color(d.ground_thruth))} )
+      .style("opacity", 0.5)
+      .on("mouseover", highlight)
+      .on("mouseleave", doNotHighlight )*/
+
+  //Bars
+  hist_class_scores = [[[{'c0':tp_score[0][0],'c1':tp_score[1][0],'c2':tp_score[2][0],'c3':tp_score[3][0],'c4':tp_score[4][0],'c5':tp_score[5][0],'c6':tp_score[6][0],'c7':tp_score[7][0],'c8':tp_score[8][0],'c9':tp_score[9][0]}],
+              [{'c0':tp_score[0][1],'c1':tp_score[1][1],'c2':tp_score[2][1],'c3':tp_score[3][1],'c4':tp_score[4][1],'c5':tp_score[5][1],'c6':tp_score[6][1],'c7':tp_score[7][1],'c8':tp_score[8][1],'c9':tp_score[9][1]}],
+              [{'c0':tp_score[0][2],'c1':tp_score[1][2],'c2':tp_score[2][2],'c3':tp_score[3][2],'c4':tp_score[4][2],'c5':tp_score[5][2],'c6':tp_score[6][2],'c7':tp_score[7][2],'c8':tp_score[8][2],'c9':tp_score[9][2]}],
+              [{'c0':tp_score[0][3],'c1':tp_score[1][3],'c2':tp_score[2][3],'c3':tp_score[3][3],'c4':tp_score[4][3],'c5':tp_score[5][3],'c6':tp_score[6][3],'c7':tp_score[7][3],'c8':tp_score[8][3],'c9':tp_score[9][3]}],
+              [{'c0':tp_score[0][4],'c1':tp_score[1][4],'c2':tp_score[2][4],'c3':tp_score[3][4],'c4':tp_score[4][4],'c5':tp_score[5][4],'c6':tp_score[6][4],'c7':tp_score[7][4],'c8':tp_score[8][4],'c9':tp_score[9][4]}],
+              [{'c0':tp_score[0][5],'c1':tp_score[1][5],'c2':tp_score[2][5],'c3':tp_score[3][5],'c4':tp_score[4][5],'c5':tp_score[5][5],'c6':tp_score[6][5],'c7':tp_score[7][5],'c8':tp_score[8][5],'c9':tp_score[9][5]}],
+              [{'c0':tp_score[0][6],'c1':tp_score[1][6],'c2':tp_score[2][6],'c3':tp_score[3][6],'c4':tp_score[4][6],'c5':tp_score[5][6],'c6':tp_score[6][6],'c7':tp_score[7][6],'c8':tp_score[8][6],'c9':tp_score[9][6]}],
+              [{'c0':tp_score[0][7],'c1':tp_score[1][7],'c2':tp_score[2][7],'c3':tp_score[3][7],'c4':tp_score[4][7],'c5':tp_score[5][7],'c6':tp_score[6][7],'c7':tp_score[7][7],'c8':tp_score[8][7],'c9':tp_score[9][7]}],
+              [{'c0':tp_score[0][8],'c1':tp_score[1][8],'c2':tp_score[2][8],'c3':tp_score[3][8],'c4':tp_score[4][8],'c5':tp_score[5][8],'c6':tp_score[6][8],'c7':tp_score[7][8],'c8':tp_score[8][8],'c9':tp_score[9][8]}],
+              [{'c0':tp_score[0][9],'c1':tp_score[1][9],'c2':tp_score[2][9],'c3':tp_score[3][9],'c4':tp_score[4][9],'c5':tp_score[5][9],'c6':tp_score[6][9],'c7':tp_score[7][9],'c8':tp_score[8][9],'c9':tp_score[9][9]}]], 		  
+	     [[{'c0':fp_score[0][0],'c1':fp_score[1][0],'c2':fp_score[2][0],'c3':fp_score[3][0],'c4':fp_score[4][0],'c5':fp_score[5][0],'c6':fp_score[6][0],'c7':fp_score[7][0],'c8':fp_score[8][0],'c9':fp_score[9][0]}],
+              [{'c0':fp_score[0][1],'c1':fp_score[1][1],'c2':fp_score[2][1],'c3':fp_score[3][1],'c4':fp_score[4][1],'c5':fp_score[5][1],'c6':fp_score[6][1],'c7':fp_score[7][1],'c8':fp_score[8][1],'c9':fp_score[9][1]}],
+              [{'c0':fp_score[0][2],'c1':fp_score[1][2],'c2':fp_score[2][2],'c3':fp_score[3][2],'c4':fp_score[4][2],'c5':fp_score[5][2],'c6':fp_score[6][2],'c7':fp_score[7][2],'c8':fp_score[8][2],'c9':fp_score[9][2]}],
+              [{'c0':fp_score[0][3],'c1':fp_score[1][3],'c2':fp_score[2][3],'c3':fp_score[3][3],'c4':fp_score[4][3],'c5':fp_score[5][3],'c6':fp_score[6][3],'c7':fp_score[7][3],'c8':fp_score[8][3],'c9':fp_score[9][3]}],
+              [{'c0':fp_score[0][4],'c1':fp_score[1][4],'c2':fp_score[2][4],'c3':fp_score[3][4],'c4':fp_score[4][4],'c5':fp_score[5][4],'c6':fp_score[6][4],'c7':fp_score[7][4],'c8':fp_score[8][4],'c9':fp_score[9][4]}],
+              [{'c0':fp_score[0][5],'c1':fp_score[1][5],'c2':fp_score[2][5],'c3':fp_score[3][5],'c4':fp_score[4][5],'c5':fp_score[5][5],'c6':fp_score[6][5],'c7':fp_score[7][5],'c8':fp_score[8][5],'c9':fp_score[9][5]}],
+              [{'c0':fp_score[0][6],'c1':fp_score[1][6],'c2':fp_score[2][6],'c3':fp_score[3][6],'c4':fp_score[4][6],'c5':fp_score[5][6],'c6':fp_score[6][6],'c7':fp_score[7][6],'c8':fp_score[8][6],'c9':fp_score[9][6]}],
+              [{'c0':fp_score[0][7],'c1':fp_score[1][7],'c2':fp_score[2][7],'c3':fp_score[3][7],'c4':fp_score[4][7],'c5':fp_score[5][7],'c6':fp_score[6][7],'c7':fp_score[7][7],'c8':fp_score[8][7],'c9':fp_score[9][7]}],
+              [{'c0':fp_score[0][8],'c1':fp_score[1][8],'c2':fp_score[2][8],'c3':fp_score[3][8],'c4':fp_score[4][8],'c5':fp_score[5][8],'c6':fp_score[6][8],'c7':fp_score[7][8],'c8':fp_score[8][8],'c9':fp_score[9][8]}],
+              [{'c0':fp_score[0][9],'c1':fp_score[1][9],'c2':fp_score[2][9],'c3':fp_score[3][9],'c4':fp_score[4][9],'c5':fp_score[5][9],'c6':fp_score[6][9],'c7':fp_score[7][9],'c8':fp_score[8][9],'c9':fp_score[9][9]}]],	     
+	      [[{'c0':fn_score[0][0],'c1':fn_score[1][0],'c2':fn_score[2][0],'c3':fn_score[3][0],'c4':fn_score[4][0],'c5':fn_score[5][0],'c6':fn_score[6][0],'c7':fn_score[7][0],'c8':fn_score[8][0],'c9':fn_score[9][0]}],
+              [{'c0':fn_score[0][1],'c1':fn_score[1][1],'c2':fn_score[2][1],'c3':fn_score[3][1],'c4':fn_score[4][1],'c5':fn_score[5][1],'c6':fn_score[6][1],'c7':fn_score[7][1],'c8':fn_score[8][1],'c9':fn_score[9][1]}],
+              [{'c0':fn_score[0][2],'c1':fn_score[1][2],'c2':fn_score[2][2],'c3':fn_score[3][2],'c4':fn_score[4][2],'c5':fn_score[5][2],'c6':fn_score[6][2],'c7':fn_score[7][2],'c8':fn_score[8][2],'c9':fn_score[9][2]}],
+              [{'c0':fn_score[0][3],'c1':fn_score[1][3],'c2':fn_score[2][3],'c3':fn_score[3][3],'c4':fn_score[4][3],'c5':fn_score[5][3],'c6':fn_score[6][3],'c7':fn_score[7][3],'c8':fn_score[8][3],'c9':fn_score[9][3]}],
+              [{'c0':fn_score[0][4],'c1':fn_score[1][4],'c2':fn_score[2][4],'c3':fn_score[3][4],'c4':fn_score[4][4],'c5':fn_score[5][4],'c6':fn_score[6][4],'c7':fn_score[7][4],'c8':fn_score[8][4],'c9':fn_score[9][4]}],
+              [{'c0':fn_score[0][5],'c1':fn_score[1][5],'c2':fn_score[2][5],'c3':fn_score[3][5],'c4':fn_score[4][5],'c5':fn_score[5][5],'c6':fn_score[6][5],'c7':fn_score[7][5],'c8':fn_score[8][5],'c9':fn_score[9][5]}],
+              [{'c0':fn_score[0][6],'c1':fn_score[1][6],'c2':fn_score[2][6],'c3':fn_score[3][6],'c4':fn_score[4][6],'c5':fn_score[5][6],'c6':fn_score[6][6],'c7':fn_score[7][6],'c8':fn_score[8][6],'c9':fn_score[9][6]}],
+              [{'c0':fn_score[0][7],'c1':fn_score[1][7],'c2':fn_score[2][7],'c3':fn_score[3][7],'c4':fn_score[4][7],'c5':fn_score[5][7],'c6':fn_score[6][7],'c7':fn_score[7][7],'c8':fn_score[8][7],'c9':fn_score[9][7]}],
+              [{'c0':fn_score[0][8],'c1':fn_score[1][8],'c2':fn_score[2][8],'c3':fn_score[3][8],'c4':fn_score[4][8],'c5':fn_score[5][8],'c6':fn_score[6][8],'c7':fn_score[7][8],'c8':fn_score[8][8],'c9':fn_score[9][8]}],
+              [{'c0':fn_score[0][9],'c1':fn_score[1][9],'c2':fn_score[2][9],'c3':fn_score[3][9],'c4':fn_score[4][9],'c5':fn_score[5][9],'c6':fn_score[6][9],'c7':fn_score[7][9],'c8':fn_score[8][9],'c9':fn_score[9][9]}]]]
+
+
+   slice_height = height/10
+for (i = 0; i < (hist_class_scores[0].length); i++) {
+for (j = 0; j < (hist_class_scores[0].length); j++) {
+
+/*svg.selectAll("myRect")
+    .data(hist_tp0[1][i])
+    .enter()
+    .append("rect")
+    .attr("x", function(d) { return x('c'+j);} )
+    .attr("y", height - ((i+1)*slice_height))
+    .attr("width", function(d) {return x_['c'+j](d['c'+j]); })
+    .attr("height", slice_height )
+    .attr("fill", 'rgb(125,125,125)')
+    .attr("stroke", 'rgb(0,0,0)')
+*/
+
+  svg.selectAll("myRect")
+    .data(hist_class_scores[1][i])
+    .enter()
+    .append("rect")
+    .attr("x", function(d) { return x('c'+j) } )
+    .attr("y", height - ((i+1)*slice_height))
+    .attr("width", function(d) {return x_['c'+j](d['c'+j]); })
+    .attr("height", slice_height )
+    .attr("fill", 'rgb(125,125,125)')
+    .attr("stroke", 'rgb(125,125,125)')
+  svg.selectAll("myRect")
+    .data(hist_class_scores[0][i])
+    .enter()
+    .append("rect")
+    .attr("x", function(d) { return x('c'+j) + x_['c'+j](hist_class_scores[1][i][0]['c'+j]);} )
+    .attr("y", height - ((i+1)*slice_height))
+    .attr("width", function(d) {return x_['c'+j](d['c'+j]); })
+    .attr("height", slice_height )
+    .attr("fill", color(j))
+    .attr("stroke", color(j))
+
+  svg.selectAll("myRect")
+    .data(hist_class_scores[2][i])
+    .enter()
+    .append("rect")
+    .attr("x", function(d) { return x('c'+j) - x_['c'+j](d['c'+j]) } )
+    .attr("y", height - ((i+1)*slice_height))
+    .attr("width", function(d) {return x_['c'+j](d['c'+j]); })
+    .attr("height", slice_height )
+    .attr("fill", 'rgb(200,200,200)')
+    .attr("stroke", 'rgb(0,0,0)')
+    .attr("stroke-width", 3)
+
+
+
+}
+}
+
+  // Draw the axis:
+  svg.selectAll("myAxis")
+    // For each dimension of the dataset I add a 'g' element:
+    .data(dimensions).enter()
+    .append("g")
+    .attr("class", "axis")
+    // I translate this element to its right position on the x axis
+    .attr("transform", function(d) { return "translate(" + x(d) + ")"; })
+    // And I build the axis with the call function
+    .each(function(d) { d3.select(this).call(d3.axisLeft().ticks(9).scale(y[d])); })
+    // Add axis title
+    .append("text")
+      .style("text-anchor", "middle")
+      .attr("y", -9)
+      .text(function(d) { return d; })
+      .style("fill", "black")
+
+})
+
+
+
+//Build Tabulator
+
+
+
+var table = new Tabulator("#example-table", {
+    height:400,
+    layout:"fitColumns",
+    autoColumns:true,
+    selectable:1,
+    placeholder:"Awaiting Data, Please Load File",
+    
+    columns: [ //Define Table Columns
+	    {title: "client_id", field: "client_id"},
+	    {title: "round_number", field: "round_number"},
+	    {title: "set", field: "set"},
+            {title: "features", field: "features", formatter:"html"},
+	    {title: "accuracy", field: "accuracy"},
+	    {title: "loss", field: "loss"},
+	    {title: "ground_thruth", field: "ground_thruth"},
+	    {title: "prediction", field: "prediction"},
+	    {title: "c0", field: "c0"},
+	    {title: "c1", field: "c1"},
+	    {title: "c2", field: "c2"},
+	    {title: "c3", field: "c3"},
+	    {title: "c4", field: "c4"},
+	    {title: "c5", field: "c5"},
+	    {title: "c6", field: "c6"},
+	    {title: "c7", field: "c7"},
+	    {title: "c8", field: "c8"},
+	    {title: "c9", field: "c9"},
+
+        ],
+    rowSelectionChanged:function(data, rows){
+
+// Color scale: give me a specie name, I return a color
+ var color = d3.scaleOrdinal()
+    .domain(['0','1','2','3','4','5','6','7','8','9' ])
+    .range(['rgb(165,0,38)','rgb(215,48,39)','rgb(244,109,67)','rgb(253,174,97)','rgb(254,224,139)','rgb(217,239,139)','rgb(166,217,106)','rgb(102,189,99)','rgb(26,152,80)','rgb(0,104,55)'])
+
+  // Here I set the list of dimension manually to control the order of axis:
+  dimensions = ["c0","c1","c2","c3","c4","c5","c6","c7","c8","c9" ]
+
+  // For each dimension, I build a linear scale. I store all in a y object
+  var y = {}
+  for (i in dimensions) {
+    name = dimensions[i]
+    y[name] = d3.scaleLinear()
+      .domain( [0.0,1.0] ) // --> Same axis range for each group
+      // --> different axis range for each group --> .domain( [d3.extent(data, function(d) { return +d[name]; })] )
+      .range([height, 0])
+  }
+  // For each dimension, I build a linear scale. I store all in a y object
+  var y = {}
+  for (i in dimensions) {
+    name = dimensions[i]
+    y[name] = d3.scaleLinear()
+      .domain( [0.0,1.0] ) // --> Same axis range for each group
+      // --> different axis range for each group --> .domain( [d3.extent(data, function(d) { return +d[name]; })] )
+      .range([height, 0])
+  }
+
+  // Build the X scale -> it find the best position for each Y axis
+  x = d3.scalePoint()
+    .range([0, width])
+    .domain(dimensions);
+  // Highlight the specie that is hovered
+  var highlight = function(d){
+
+    selected_gt = d.ground_thruth
+
+    // first every group turns grey
+    d3.selectAll(".line")
+      .transition().duration(200)
+      .style("stroke", "lightgrey")
+      .style("opacity", "1")
+    // Second the hovered specie takes its color
+    d3.selectAll("." + selected_gt)
+      .transition().duration(200)
+      .style("stroke", 'blue')
+      .style("opacity", "1")
+  }
+
+  // Unhighlight
+  var doNotHighlight = function(d){
+    d3.selectAll(".line")
+      .transition().duration(200).delay(1000)
+      .style("stroke", function(d){ return( color(d.ground_thruth))} )
+      .style("opacity", "1")
+  }
+
+  // The path function take a row of the csv as input, and return x and y coordinates of the line to draw for this raw.
+  function path(d) {
+      return d3.line()(dimensions.map(function(p) { return [x(p), y[p](d[p])]; }));
+  }
+
+d3.selectAll("path.line").remove();
+        //update selected row counter on selection change
+    svg
+    .selectAll("myPath")
+    .data(data)
+    .enter()
+    .append("path")
+      .attr("class", function (d) { return "line " + d.ground_thruth } ) // 2 class for each line: 'line' and the group name
+      .attr("d",  path)
+      .style("fill", "none" )
+      .style("stroke", function(d){ return( color(d.ground_thruth))} )
+      .style("opacity", 1)
+      .on("mouseover", highlight)
+      .on("mouseleave", doNotHighlight )
+
+	if(data.length > 0){
+		document.getElementById("sel_image").src = data[0]['features']
+	}else{
+		document.getElementById("sel_image").src = 'd3.png'
+	}
+
+    },
+
+});
+
+//trigger AJAX load on "Load Data via AJAX" button click
+//document.getElementById("file-load-trigger").addEventListener("click", function(){
+    table.setData(fileName+".json");
+    //table.addColumn({title:"Age", field:"age"}, true, "name");
+//table.columns['features'].{title: "Features", field: "features", formatter:"html"},
+//});
+}
+
+var fileName
+
+function getInputValue(){
+
+    fileName = document.getElementById("myInput").value;
+    d3.select("svg").remove();
+    main(fileName)
+}
+</script>
+
+
