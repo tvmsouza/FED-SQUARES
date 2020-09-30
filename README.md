@@ -5,4 +5,4 @@ Federated Learning (FL) is a new paradigm on Machine Learning(ML) that permits t
 
 [1] D.  Ren,  S.  Amershi,  B.  Lee,  J.  Suh,  and  J.  D.  Williams.   Squares:Supporting interactive performance analysis for multiclass classifiers.vol. 23, pp. 61–70, 2017.
 
-![alt text](https://github.com/[username]/[reponame]/blob/[branch]/image.jpg?raw=true)
+![Fed-Squares Visualization](https://github.com/tvmsouza/FED-SQUARES/blob/master/images/correct_sample.png?raw=true)
