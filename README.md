@@ -13,7 +13,7 @@ Federated Learning (FL) is a new paradigm on Machine Learning(ML) that permits t
 - Open the terminal and go to the folder fed-squares
 - run the command: python -m http.server
 - Access in a browser: http://localhost:8000/
-- Select the 'fed_dquares.html' file
+- Select the 'fed_squares.html' file
 - On the screen select one of the tests showed at the paper typing one of the names:
   - metrics_stat500
   - metrics_stat1000_1
