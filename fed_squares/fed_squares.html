@@ -279,20 +279,6 @@ x[2].innerHTML = "Total Samples: "+data.length + "----Class distribution: [" + s
     .range([0.0, width])
     .domain(dimensions);
 
-  // Draw the lines
-  /*svg
-    .selectAll("myPath")
-    .data(data)
-    .enter()
-    .append("path")
-      .attr("class", function (d) { return "line " + d.ground_thruth } ) // 2 class for each line: 'line' and the group name
-      .attr("d",  path)
-      .style("fill", "none" )
-      .style("stroke", function(d){ return( color(d.ground_thruth))} )
-      .style("opacity", 0.5)
-      .on("mouseover", highlight)
-      .on("mouseleave", doNotHighlight )*/
-
   //Bars
   hist_class_scores = [[[{'c0':tp_score[0][0],'c1':tp_score[1][0],'c2':tp_score[2][0],'c3':tp_score[3][0],'c4':tp_score[4][0],'c5':tp_score[5][0],'c6':tp_score[6][0],'c7':tp_score[7][0],'c8':tp_score[8][0],'c9':tp_score[9][0]}],
               [{'c0':tp_score[0][1],'c1':tp_score[1][1],'c2':tp_score[2][1],'c3':tp_score[3][1],'c4':tp_score[4][1],'c5':tp_score[5][1],'c6':tp_score[6][1],'c7':tp_score[7][1],'c8':tp_score[8][1],'c9':tp_score[9][1]}],
@@ -329,18 +315,6 @@ x[2].innerHTML = "Total Samples: "+data.length + "----Class distribution: [" + s
    slice_height = height/10
 for (i = 0; i < (hist_class_scores[0].length); i++) {
 for (j = 0; j < (hist_class_scores[0].length); j++) {
-
-/*svg.selectAll("myRect")
-    .data(hist_tp0[1][i])
-    .enter()
-    .append("rect")
-    .attr("x", function(d) { return x('c'+j);} )
-    .attr("y", height - ((i+1)*slice_height))
-    .attr("width", function(d) {return x_['c'+j](d['c'+j]); })
-    .attr("height", slice_height )
-    .attr("fill", 'rgb(125,125,125)')
-    .attr("stroke", 'rgb(0,0,0)')
-*/
 
   svg.selectAll("myRect")
     .data(hist_class_scores[1][i])
@@ -521,12 +495,8 @@ d3.selectAll("path.line").remove();
 
 });
 
-//trigger AJAX load on "Load Data via AJAX" button click
-//document.getElementById("file-load-trigger").addEventListener("click", function(){
     table.setData(fileName+".json");
-    //table.addColumn({title:"Age", field:"age"}, true, "name");
-//table.columns['features'].{title: "Features", field: "features", formatter:"html"},
-//});
+
 }
 
 var fileName
