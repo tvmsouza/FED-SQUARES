@@ -36,6 +36,6 @@ python main.py -dataset femnist -model cnn
 - Concluding the training two files will be generated at the folder leaf/model/metrics:
  - metrics_stat.csv and metrics_stat.json
 - Put the files on the folder fed_squares of this project.
-- Initialize the server and the fed_sqaures visualization acording to the last session.
+- Initialize the server and the fed_squares visualization acording to the last session.
 - Type the name of files to be analised (example: metrics_stat)
 
