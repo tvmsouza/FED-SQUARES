@@ -28,7 +28,7 @@ Federated Learning (FL) is a new paradigm on Machine Learning(ML) that permits t
  
 - The Federated simulations are made with the LEAF benchmark so you have to install all the requirements and the LEAF benchmark at the link:
   https://github.com/TalwalkarLab/leaf
-- After this you have to preprocess the FEMNIST dataset with the filters mentioned in the paper and save the csv/json files, for this substitute all files on the    original leaf folder by the files present in the leaf folder of this repo.
+- After this you have to preprocess the FEMNIST dataset with the filters mentioned in the paper and save the csv/json files, for this replace all files on the    original leaf folder by the files present in the leaf folder of this repo.
 - After replace the files go to the folder on the original femnist leaf/data/femnist through the terminal and execute:
 ./preprocess.sh -s niid --sf 0.1 -k 0 -t sample --smplseed 123 --spltseed 123
 - After the preprocessing the dataset foto the folder leaf/model and execute:
