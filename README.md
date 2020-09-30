@@ -6,3 +6,33 @@ Federated Learning (FL) is a new paradigm on Machine Learning(ML) that permits t
 [1] D.  Ren,  S.  Amershi,  B.  Lee,  J.  Suh,  and  J.  D.  Williams.   Squares:Supporting interactive performance analysis for multiclass classifiers.vol. 23, pp. 61–70, 2017.
 
 ![Fed-Squares Visualization](https://github.com/tvmsouza/FED-SQUARES/blob/master/images/correct_sample.png?raw=true)
+
+# Testing the solution
+
+- Clone the repo to a workspace
+- Open the terminal and go to the folder fed-squares
+- run the command: python -m http.server
+- Access in a browser: http://localhost:8000/
+- Select the 'fed_dquares.html' file
+- On the screen select one of the tests showed at the paper typing one of the names:
+  - metrics_stat500
+  - metrics_stat1000_1
+  - metrics_stat1000_2
+  - metrics_stat3000
+ -Press the button analyse
+ 
+ # Generating new cases of test
+ 
+- The Federated simulations are made with the LEAF benchmark so you have to install all the requirements and the LEAF benchmark at the link:
+  https://github.com/TalwalkarLab/leaf
+- After this you have to preprocess the FEMNIST dataset with the filters mentioned in the paper and save the csv/json files, for this substitute all files on the    original leaf folder by the files present in the leaf folder of this repo.
+- After replace the files go to the folder on the original femnist leaf/data/femnist through the terminal and execute:
+./preprocess.sh -s niid --sf 0.1 -k 0 -t sample --smplseed 123 --spltseed 123
+- After the preprocessing the dataset foto the folder leaf/model and execute:
+python main.py -dataset femnist -model cnn
+- Concluding the training two files will be generated at the folder leaf/model/metrics:
+ - metrics_stat.csv and metrics_stat.json
+- Put the files on the folder fed_squares of this project.
+- Initialize the server and the fed_sqaures visualization acording to the last session.
+- Type the name of files to be analised (example: metrics_stat)
+
