@@ -1,6 +1,9 @@
 # FED-SQUARES
 Fed-Squares: Use of Squares-Based Tool for analysis of Federated Learning Simulations
 
+Thiago V.M. Souza 
+email: tvms@cin.ufpe.br
+
 Federated Learning (FL) is a new paradigm on Machine Learning(ML) that permits train an ML model in a distributed way.  Thetraining process is executed at the edge-preserving of the user’sprivacy since the data never leaves the local device that differs fromthe standard paradigm centralized, where the users sent data to acentral server.  The FL scenario deals with a more heterogeneous scenario related to data distribution between clients that are notanalyzed by an engineer as in a centralized paradigm.  In general,statistical techniques such as accuracy, recall, precision, log loss,and the confusion matrix, in visualization, are used to compare themodels and interpret if the training process occurs well, and themodel converged to a defined scenario. However, these techniquesonly give an overall idea about how the data is used and threadedby the model, given similar comparison values between two modelswith very different characteristics.  The SQUARES [1] technique permits a more precise evaluation of the model at the instance level,which allows the analysis, data biases, inspection, outliers, and how the model responds while training to the tested samples. This papershows a SQUARES prototype’s development and evaluation of an FL image classification model’s different scenarios. In this more challenging scenario, we expect to help through the visualization finds some insights and exciting inferences and cases that are impossible only with the standards visualizations and metrics before mentionedand most found on ML benchmarks.
 
 [1] D.  Ren,  S.  Amershi,  B.  Lee,  J.  Suh,  and  J.  D.  Williams.   Squares:Supporting interactive performance analysis for multiclass classifiers.vol. 23, pp. 61–70, 2017.
